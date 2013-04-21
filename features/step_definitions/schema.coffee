@@ -20,8 +20,16 @@ module.exports = ->
 		expected = JSON.parse table.hashes()[0]['JSON structure']
 		# console.log 'expected:', expected
 		# console.log 'result:', @result
-		m = util.matchStruct(expected, @result, true)
-		if m != true
-			callback.fail(m)
-		else
+		util.matchStruct expected, @result
+		callback()
+
+	@When /^I call "([^"]*)" with the following parameter:$/, (function_name, table, callback)->
+		# console.log "table:", table.hashes()
+		@new_entity_schema = JSON.parse table.hashes()[0]['JSON structure']
+		@app[function_name] @new_entity_schema, (result)=>
+			callback()
+
+	@Then /^I can see the new schema in "([^"]*)"$/, (function_name, callback)->
+		@app[function_name] (result)=>
+			util.matchStruct [@new_entity_schema], result
 			callback()

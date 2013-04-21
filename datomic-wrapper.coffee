@@ -89,6 +89,27 @@ class DatomicWrapper
 				[?card :db/ident ?card_ident]
 			]', done
 
+	create_schema: (entity_schema, done)->
+		# console.log entity_schema
+		entity_name = entity_schema.name
+		data = []
+		for attr in entity_schema.attributes
+			data.push edn.map [
+				edn.keyword 'db/id'
+				edn.generic 'db/id', [edn.keyword 'db.part/db']
+				edn.keyword 'db/ident'
+				edn.keyword entity_name + '/' + attr.name
+				edn.keyword 'db/valueType'
+				edn.keyword 'db.type/' + attr.type
+				edn.keyword 'db/cardinality'
+				edn.keyword 'db.cardinality/' + attr.cardinality
+				edn.keyword 'db.install/_attribute'
+				edn.keyword 'db.part/db'
+			]
+
+		@transact edn.stringify(data), (result)->
+			done()
+
 module.exports.Attribute = Attribute
 module.exports.Entity = Entity
 module.exports.DatomicWrapper = DatomicWrapper

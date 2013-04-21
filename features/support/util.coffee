@@ -4,12 +4,12 @@ matchObject = (expected, result, skipException)->
 			s = 'No "'+key+'" key in result object: '+result
 			if skipException
 				return s
-			throw s
+			throw new Error s
 		s = matchStruct value, result[key], skipException
 		if s != true
 			if skipException
 				return s
-			throw s
+			throw new Error s
 	return true
 
 matchArray = (expected, result, skipException)->
@@ -17,7 +17,7 @@ matchArray = (expected, result, skipException)->
 		s = 'Expected array has more elements than result array: '+expected.length+' > '+result.length
 		if skipException
 			return s
-		throw s
+		throw new Error s
 	for value in expected
 		found = false
 		for i in [0...result.length]
@@ -28,7 +28,7 @@ matchArray = (expected, result, skipException)->
 			s = 'Cannot match "'+JSON.stringify(value)+'" in result array: "'+JSON.stringify(result)+'"'
 			if skipException
 				return s
-			throw s
+			throw new Error s
 	return true
 
 matchStruct = (expected, result, skipException)->
@@ -39,30 +39,30 @@ matchStruct = (expected, result, skipException)->
 		s = 'Incompatible types: '+type_expected+' != '+type_result
 		if skipException
 			return s
-		throw s
+		throw new Error s
 	if type_expected == 'array'
 		s = matchArray expected, result, skipException
 		if s != true
 			if skipException
 				return s
-			throw s
+			throw new Error s
 	else if type_expected == 'object'
 		s = matchObject expected, result, skipException
 		if s != true
 			if skipException
 				return s
-			throw s
+			throw new Error s
 	else if type_expected == 'string'
 		if expected != result
 			s = 'Strings not match: '+expected+' != '+result
 			if skipException
 				return s
-			throw s
+			throw new Error s
 	else
 		s = 'Unknown type: '+type_expected
 		if skipException
 			return s
-		throw s
+		throw new Error s
 	return true
 
 isArray = (value)->
