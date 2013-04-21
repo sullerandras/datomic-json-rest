@@ -1,0 +1,17 @@
+{
+	"name": "datomic-json-rest",
+	"version": "1.0.0",
+	"private": true,
+	"dependencies": {
+		"express": "",
+		"coffee-script": "",
+		"request": "",
+		"js-edn": "git://github.com/josh/js-edn.git",
+		"optimist": ""
+	},
+	"devDependencies": {
+		"nodemon": "",
+		"cucumber": "",
+		"mocha": ""
+	}
+}
