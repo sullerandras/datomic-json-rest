@@ -33,3 +33,8 @@ module.exports = ->
 		@app[function_name] (result)=>
 			util.matchStruct [@new_entity_schema], result
 			callback()
+
+	@When /^I call "([^"]*)" with "([^"]*)"$/, (function_name, entity_name, callback)->
+		@app[function_name] entity_name, (result)=>
+			@result = result
+			callback()

@@ -110,6 +110,13 @@ class DatomicWrapper
 		@transact edn.stringify(data), (result)->
 			done()
 
+	get_schema: (entity_name, done)->
+		@schemas_all (entities)->
+			for ent in entities
+				if ent.name == entity_name
+					return done(ent)
+			throw new Error 'Entity with name "'+entity_name+'" not found'
+
 module.exports.Attribute = Attribute
 module.exports.Entity = Entity
 module.exports.DatomicWrapper = DatomicWrapper
