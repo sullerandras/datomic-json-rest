@@ -38,14 +38,17 @@ app.configure 'development', ->
 app.configure 'production', -> app.use express.errorHandler()
 
 datomic = new DatomicWrapper(argv['datomic-host'], argv['datomic-port'], argv['alias'], argv['db_name'])
-schemas =
-	list_all: (req, res) ->
-		datomic.schemas_all (result)->
-			res.send result
 
 app.get '/', (req, res) -> res.render 'index', layout: false
 app.get '/schema', (req, res) ->
-	schemas.list_all req, res
+	datomic.schemas_all (result)->
+		res.send result
+app.post '/schema', (req, res)->
+	datomic.create_schema (result)->
+		res.send result
+app.get '/schema/:schema_name', (req, res) ->
+	datomic.get_schema req.params.schema_name, (result)->
+		res.send result
 
 if argv.help
 	console.log optimist.help()
