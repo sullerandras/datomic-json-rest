@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Seattle Communities</title>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/coffee-script/1.6.2/coffee-script.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular-resource.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular-sanitize.min.js"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.2.0/ui-bootstrap-tpls.js"></script>
+	<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+	<style type="text/css">
+		table { border-collapse: collapse }
+		th, td { border: 1px solid black }
+	</style>
+	<script type="text/coffeescript">
+		app = angular.module 'MyApp', ['ngResource', 'ngSanitize', 'ui.bootstrap']
+		@AppController = (scope, $resource)->
+			Community = $resource '/rest/community/:id', id: '@id'
+			Neighborhood = $resource '/rest/neighborhood/:id', id: '@id'
+			District = $resource '/rest/district/:id', id: '@id'
+			scope.communities = Community.query()
+			scope.neighborhoods = Neighborhood.query()
+			scope.districts = District.query()
+		AppController.$inject = ['$scope', '$resource']
+
+		angular.bootstrap document, ['MyApp']
+	</script>
+</head>
+<body ng-controller="AppController">
+	Datomic Demo
+	<tabs>
+		<pane heading="Communities">
+			<table>
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>id</th>
+						<th>name</th>
+						<th>url</th>
+						<th>neighborhood</th>
+						<th>category</th>
+						<th>orgtype</th>
+						<th>type</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="c in communities">
+						<td>{{$index + 1}}</td>
+						<td>{{c.id}}</td>
+						<td>{{c.name}}</td>
+						<td ng-bind-html="c.url | linky"></td>
+						<td>{{c.neighborhood}}</td>
+						<td>{{c.category.join(', ')}}</td>
+						<td>{{c.orgtype.replace('community.orgtype/', '')}}</td>
+						<td>{{c.type.replace('community.type/', '')}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</pane>
+		<pane heading="Neighborhoods">
+			<table>
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>id</th>
+						<th>name</th>
+						<th>district</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="n in neighborhoods">
+						<td>{{$index + 1}}</td>
+						<td>{{n.id}}</td>
+						<td>{{n.name}}</td>
+						<td>{{n.district}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</pane>
+		<pane heading="District">
+			<table>
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>id</th>
+						<th>name</th>
+						<th>region</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="d in districts">
+						<td>{{$index + 1}}</td>
+						<td>{{d.id}}</td>
+						<td>{{d.name}}</td>
+						<td>{{d.region}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</pane>
+	</tabs>
+</body>
+</html>
