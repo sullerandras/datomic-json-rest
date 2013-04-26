@@ -162,6 +162,10 @@ class DatomicWrapper
 					# console.log 'results:', results
 					done err, results
 
+	rest_get: (entity_name, id, done)->
+		@query_entity id, (error, entity)->
+			done error, entity
+
 module.exports.Attribute = Attribute
 module.exports.Entity = Entity
 module.exports.DatomicWrapper = DatomicWrapper

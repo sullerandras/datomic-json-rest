@@ -46,3 +46,12 @@ module.exports = ->
 		# console.log data
 		@app.transact '['+data+']', ->
 			callback()
+
+	@When /^I call "rest_get" with "user" and the first object's id$/, (callback)->
+		@app.rest_get "user", @result[0].id, (err, result)=>
+			@result_entity = result
+			callback()
+
+	@Then /^I get back the first object$/, (callback)->
+		util.matchStruct @result[0], @result_entity
+		callback()

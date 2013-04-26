@@ -23,6 +23,9 @@ describe 'util', ->
     it 'matches strings', ->
       assert_equal true, util.matchStruct 'string', 'string'
 
+    it 'matches numbers', ->
+      assert_equal true, util.matchStruct 1234, 1234
+
     it 'matches regular expression to strings or numbers', ->
       assert_equal true, util.matchStruct '/[a-z]+/', 'string'
       assert_equal 'RegExp not match: /[0-9]+/ != string', util.matchStruct '/[0-9]+/', 'string', true

@@ -67,6 +67,12 @@ matchStruct = (expected, result, skipException)->
 			if skipException
 				return s
 			throw new Error s
+	else if type_expected == 'number'
+		if expected != result
+			s = 'Numbers not match: '+expected+' != '+result
+			if skipException
+				return s
+			throw new Error s
 	else
 		s = 'Unknown type: '+type_expected
 		if skipException

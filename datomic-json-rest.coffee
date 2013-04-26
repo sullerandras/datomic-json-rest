@@ -74,6 +74,10 @@ app.get '/rest/:name', (req, res) ->
 			console.info 'Returning '+result.length+' '+req.params.name+' entities.'
 		sendErrorOrResult req, res, err, result
 
+app.get '/rest/:name/:id', (req, res) ->
+	datomic.rest_get req.params.name, req.params.id, (err, result)->
+		sendErrorOrResult req, res, err, result
+
 if argv.help
 	console.log optimist.help()
 else
