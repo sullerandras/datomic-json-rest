@@ -1,6 +1,7 @@
 #!/usr/local/bin/coffee
 express = require 'express'
 coffee = require 'coffee-script'
+stacktrace = require 'stacktrace-js'
 DatomicWrapper = require('./datomic-wrapper').DatomicWrapper
 optimist = require('optimist')
 	.usage('Starts the JSON REST wrapper for the specified Datomic REST server and database.\n'+
@@ -27,6 +28,8 @@ app = module.exports = express()
 
 public_dir = __dirname + '/public'
 app.configure ->
+	app.use express.logger({ immediate: true, format: 'Begin request: :method :url' })
+	app.use express.logger({ format: 'dev' })
 	app.use express.bodyParser()
 	app.use express.methodOverride()
 	app.use app.router
@@ -37,18 +40,39 @@ app.configure 'development', ->
 
 app.configure 'production', -> app.use express.errorHandler()
 
+sendError = (req, res, err)->
+	if err instanceof Error
+		s = stacktrace({e: err}).join '\n\t'
+	else
+		s = err.toString()
+	res.send {error: s}
+sendErrorOrResult = (req, res, err, result)->
+	if err
+		sendError req, res, err
+	else
+		res.send result
+
 datomic = new DatomicWrapper(argv['datomic-host'], argv['datomic-port'], argv['alias'], argv['db_name'])
 
 app.get '/', (req, res) -> res.render 'index', layout: false
+
 app.get '/schema', (req, res) ->
-	datomic.schemas_all (result)->
-		res.send result
+	datomic.schemas_all (err, result)->
+		sendErrorOrResult req, res, err, result
+
 app.post '/schema', (req, res)->
-	datomic.create_schema (result)->
-		res.send result
+	datomic.create_schema (err, result)->
+		sendErrorOrResult req, res, err, result
+
 app.get '/schema/:schema_name', (req, res) ->
-	datomic.get_schema req.params.schema_name, (result)->
-		res.send result
+	datomic.get_schema req.params.schema_name, (err, result)->
+		sendErrorOrResult req, res, err, result
+
+app.get '/rest/:name', (req, res) ->
+	datomic.rest_index req.params.name, (err, result)->
+		if !err
+			console.info 'Returning '+result.length+' '+req.params.name+' entities.'
+		sendErrorOrResult req, res, err, result
 
 if argv.help
 	console.log optimist.help()

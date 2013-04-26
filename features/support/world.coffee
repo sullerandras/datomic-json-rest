@@ -1,4 +1,4 @@
-datomic_wrapper = require('../../datomic-wrapper')
+datomic_wrapper = require '../../datomic-wrapper'
 
 World = (callback)->
 	@app = new datomic_wrapper.DatomicWrapper('localhost', 8888, 'test_alias', 'test')

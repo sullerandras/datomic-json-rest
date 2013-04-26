@@ -1,4 +1,4 @@
-util = require('../support/util')
+util = require '../support/util'
 
 module.exports = ->
 	@World = require("../support/world").World # overwrite default World constructor
@@ -11,7 +11,7 @@ module.exports = ->
 			callback()
 
 	@When /^I call "([^"]*)"$/, (function_name, callback) ->
-		@app[function_name] (result)=>
+		@app[function_name] (err, result)=>
 			@result = result
 			callback()
 
@@ -26,15 +26,23 @@ module.exports = ->
 	@When /^I call "([^"]*)" with the following parameter:$/, (function_name, table, callback)->
 		# console.log "table:", table.hashes()
 		@new_entity_schema = JSON.parse table.hashes()[0]['JSON structure']
-		@app[function_name] @new_entity_schema, (result)=>
+		@app[function_name] @new_entity_schema, ->
 			callback()
 
 	@Then /^I can see the new schema in "([^"]*)"$/, (function_name, callback)->
-		@app[function_name] (result)=>
+		@app[function_name] (err, result)=>
 			util.matchStruct [@new_entity_schema], result
 			callback()
 
 	@When /^I call "([^"]*)" with "([^"]*)"$/, (function_name, entity_name, callback)->
-		@app[function_name] entity_name, (result)=>
+		@app[function_name] entity_name, (err, result)=>
 			@result = result
+			callback()
+
+	@Given /^There are the following facts in the database:$/, (table, callback)->
+		data = ''
+		for row in table.hashes()
+			data += row['edn facts']
+		# console.log data
+		@app.transact '['+data+']', ->
 			callback()

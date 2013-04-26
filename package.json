@@ -7,7 +7,9 @@
 		"coffee-script": "",
 		"request": "",
 		"js-edn": "git://github.com/josh/js-edn.git",
-		"optimist": ""
+		"optimist": "",
+		"async": "",
+		"stacktrace-js": ""
 	},
 	"devDependencies": {
 		"nodemon": "",

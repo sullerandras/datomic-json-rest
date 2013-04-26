@@ -1,5 +1,7 @@
-request = require "request"
-edn = require "edn"
+request = require 'request'
+edn = require 'edn'
+async = require 'async'
+util = require './features/support/util'
 
 class Attribute
 	constructor: (@id, @name, @type, @cardinality)->
@@ -34,7 +36,7 @@ class DatomicWrapper
 		@log 'Creating database: '+db_name
 		request req, (error, response, body)=>
 			@log 'Server response:', error, response.statusCode, body
-			done edn.parse body
+			done null, edn.parse body
 
 	transact: (data_edn, done)->
 		req =
@@ -47,7 +49,7 @@ class DatomicWrapper
 		@log 'Transacting data: '+data_edn
 		request req, (error, response, body)=>
 			@log 'Server response:', error, response.statusCode, body
-			done edn.parse body
+			done null, edn.parse body
 
 	query: (query_edn, done)->
 		req =
@@ -58,6 +60,31 @@ class DatomicWrapper
 		@log 'Querying the database:', 'req'
 		request req, (error, response, body)=>
 			@log 'Server response:', error, response.statusCode, body
+			done error, response, body
+
+	query_entity: (entity_id, done)->
+		req =
+			url: @base_url()+'/data/'+@db_alias()+'/-/entity?e='+entity_id
+			method: 'GET'
+			headers:
+				Accept: 'application/edn'
+		@log 'Querying entity:', req
+		request req, (error, response, body)=>
+			if error
+				return done error, null
+			try
+				@log 'Server response:', error, response.statusCode, body
+				data = edn.parse body
+				entity = {}
+				for key in data.keys
+					entity[key.name] = util.edn_to_json data.get key
+				# console.log entity
+				done null, entity
+			catch e
+				done e, null
+
+	query_schema: (query_edn, done)->
+		@query query_edn, (error, response, body)->
 			parsed = edn.parse(body)
 			entities = []
 			parsed.forEach (rec)->
@@ -75,10 +102,10 @@ class DatomicWrapper
 					e = new Entity entity_name
 					entities.push e
 				e.addAttribute new Attribute id, attr_name, attr_type, cardinality
-			done entities
+			done null, entities
 
 	schemas_all: (done)->
-		@query '
+		@query_schema '
 			[:find ?e ?ident ?vt ?vt_ident ?card ?card_ident
 			:in $
 			:where
@@ -111,11 +138,29 @@ class DatomicWrapper
 			done()
 
 	get_schema: (entity_name, done)->
-		@schemas_all (entities)->
+		@schemas_all (err, entities)->
 			for ent in entities
 				if ent.name == entity_name
-					return done(ent)
-			throw new Error 'Entity with name "'+entity_name+'" not found'
+					return done(null, ent)
+			done new Error 'Entity with name "'+entity_name+'" not found'
+
+	rest_index: (entity_name, done)->
+		@get_schema entity_name, (err, entity_schema)=>
+			query_ids_for_attribute = (attr, done)=>
+				@query '[:find ?c :where [?c :'+entity_name+'/'+attr.name+']]', (error, response, body)->
+					done error, edn.parse(body).map (row)->
+						row[0]
+			query_entity_with_id = (id, done)=>
+				@query_entity id, (error, entity)->
+					done error, entity
+			async.map entity_schema.attributes, query_ids_for_attribute, (err, results)=>
+				# console.log 'async map:', err, results
+				ids = results.reduce((a,b)-> a.concat b).filter((el,i,a)->i==a.indexOf el)
+				# console.log 'ids:', ids
+				async.map ids, query_entity_with_id, (err, results)=>
+					# console.log 'err:', err
+					# console.log 'results:', results
+					done err, results
 
 module.exports.Attribute = Attribute
 module.exports.Entity = Entity
