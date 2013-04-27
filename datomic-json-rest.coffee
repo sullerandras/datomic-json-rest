@@ -2,6 +2,7 @@
 express = require 'express'
 coffee = require 'coffee-script'
 stacktrace = require 'stacktrace-js'
+util = require './features/support/util'
 DatomicWrapper = require('./datomic-wrapper').DatomicWrapper
 optimist = require('optimist')
 	.usage('Starts the JSON REST wrapper for the specified Datomic REST server and database.\n'+
@@ -80,6 +81,10 @@ app.get '/rest/:name/:id', (req, res) ->
 
 app.post '/rest/:name', (req, res)->
 	datomic.create_entity req.params.name, req.body, (err, result)->
+		sendErrorOrResult req, res, err, result
+
+app.put '/rest/:name/:id', (req, res)->
+	datomic.update_entity req.params.name, util.parseID(req.params.id), req.body, (err, result)->
 		sendErrorOrResult req, res, err, result
 
 if argv.help

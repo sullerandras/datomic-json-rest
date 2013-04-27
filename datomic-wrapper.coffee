@@ -36,6 +36,10 @@ class DatomicWrapper
 		@log 'Creating database: '+db_name
 		request req, (error, response, body)=>
 			@log 'Server response:', error, response.statusCode, body
+			if error
+				return done error, null
+			if response.statusCode >= 400
+				return done body, null
 			done null, edn.parse body
 
 	transact: (data_edn, done)->
@@ -49,6 +53,10 @@ class DatomicWrapper
 		@log 'Transacting data: '+data_edn
 		request req, (error, response, body)=>
 			@log 'Server response:', error, response.statusCode, body
+			if error
+				return done error, null
+			if response.statusCode >= 400
+				return done body, null
 			done null, edn.parse body
 
 	query: (query_edn, done)->
@@ -60,7 +68,11 @@ class DatomicWrapper
 		@log 'Querying the database:', 'req'
 		request req, (error, response, body)=>
 			@log 'Server response:', error, response.statusCode, body
-			done error, response, body
+			if error
+				return done error, null
+			if response.statusCode >= 400
+				return done body, null
+			done null, response, body
 
 	query_entity: (entity_id, done)->
 		req =
@@ -74,6 +86,10 @@ class DatomicWrapper
 				return done error, null
 			try
 				@log 'Server response:', error, response.statusCode, body
+				if error
+					return done error, null
+				if response.statusCode >= 400
+					return done body, null
 				data = edn.parse body
 				entity = {}
 				for key in data.keys
@@ -181,6 +197,21 @@ class DatomicWrapper
 				id = result.get(edn.keyword 'tempids').values[0]
 				res = util.extend {id: id}, attributes
 				done null, res
+
+	update_entity: (entity_name, id, attributes, done)->
+		data = edn.Map()
+		data.set edn.keyword('db/id'), edn.generic('db/id', [edn.keyword('db.part/user'), id])
+		for key, value of attributes
+			if key != 'id'
+				data.set edn.keyword(entity_name+'/'+key), value
+		data = edn.stringify [data]
+		@transact data, (err, result)->
+			# console.log 'err:', err
+			# console.log result
+			if err
+				done err, null
+			else
+				done null, attributes
 
 module.exports.Attribute = Attribute
 module.exports.Entity = Entity

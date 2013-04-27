@@ -94,6 +94,7 @@ isRegExp = (value)->
 	typeof(value) == 'string' && value.length >= 3 && value[0] == '/' && value[value.length - 1] == '/'
 
 type = (value)->
+	return 'null' if value == null
 	if isArray(value) then 'array' else typeof(value)
 
 edn_to_json = (value)->
@@ -113,7 +114,14 @@ edn_to_json = (value)->
 		return value.values[0]
 	throw new Error 'Unsupported value: '+(if value.inspect then value.inspect() else value)+', type: '+typeof value
 
+parseID = (value)->
+	n = parseInt value
+	if n.toString() != value
+		throw new Error 'Value is either a too big number, or it is not an integer: '+value
+	n
+
 module.exports.matchStruct = matchStruct
 module.exports.type = type
 module.exports.edn_to_json = edn_to_json
 module.exports.extend = extend
+module.exports.parseID = parseID

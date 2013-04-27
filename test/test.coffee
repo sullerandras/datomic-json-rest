@@ -19,6 +19,12 @@ describe 'util', ->
     it 'returns "string" for strings', ->
       assert_equal 'string', util.type 'value'
 
+    it 'returns "null" for null', ->
+      assert_equal 'null', util.type null
+
+    it 'returns "undefined" for undefined', ->
+      assert_equal 'undefined', util.type undefined
+
   describe '#matchStruct', ->
     it 'matches strings', ->
       assert_equal true, util.matchStruct 'string', 'string'
@@ -89,3 +95,16 @@ describe 'util', ->
       result = util.extend source, {address: 'Long road 32'}
       util.matchStruct source, result
       util.matchStruct result, source
+
+  describe '#parseID', ->
+    it 'converts string ID into number', ->
+      assert_equal 12345, util.parseID '12345'
+
+    it 'throws error if the value cannot be represented as a number in JavaScript', ->
+      was_error = false
+      try
+        util.parseID '9007199254740993'
+      catch e
+        was_error = true
+      if !was_error
+        throw new Error 'Should have thrown an error'
