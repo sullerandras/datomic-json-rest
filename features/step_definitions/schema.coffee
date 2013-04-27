@@ -1,5 +1,12 @@
 util = require '../support/util'
 
+matchStruct = (expected, result, callback)->
+	try
+		util.matchStruct expected, result
+		callback()
+	catch e
+		callback.fail e
+
 module.exports = ->
 	@World = require("../support/world").World # overwrite default World constructor
 
@@ -20,8 +27,7 @@ module.exports = ->
 		expected = JSON.parse table.hashes()[0]['JSON structure']
 		# console.log 'expected:', expected
 		# console.log 'result:', @result
-		util.matchStruct expected, @result
-		callback()
+		matchStruct expected, @result, callback
 
 	@When /^I call "([^"]*)" with the following parameter:$/, (function_name, table, callback)->
 		# console.log "table:", table.hashes()
@@ -31,8 +37,7 @@ module.exports = ->
 
 	@Then /^I can see the new schema in "([^"]*)"$/, (function_name, callback)->
 		@app[function_name] (err, result)=>
-			util.matchStruct [@new_entity_schema], result
-			callback()
+			matchStruct [@new_entity_schema], result, callback
 
 	@When /^I call "([^"]*)" with "([^"]*)"$/, (function_name, entity_name, callback)->
 		@app[function_name] entity_name, (err, result)=>
@@ -53,8 +58,7 @@ module.exports = ->
 			callback()
 
 	@Then /^I get back the first object$/, (callback)->
-		util.matchStruct @result[0], @result_entity
-		callback()
+		matchStruct @result[0], @result_entity, callback
 
 	@When /^I create a new user entity with the following parameter:$/, (table, callback)->
 		@new_entity = JSON.parse table.hashes()[0]['JSON structure']
@@ -65,10 +69,8 @@ module.exports = ->
 	@Then /^the result is the entity with a newly assigned ID$/, (callback)->
 		new_entity = util.extend {}, @new_entity
 		new_entity.id = '/[0-9]+/'
-		util.matchStruct new_entity, @result
-		callback()
+		matchStruct new_entity, @result, callback
 
 	@Then /^I can see the new entity in "rest_index" with the same ID$/, (callback)->
 		@app.rest_index "user", (err, result)=>
-			util.matchStruct [@result], result
-			callback()
+			matchStruct [@result], result, callback
