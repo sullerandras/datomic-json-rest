@@ -166,6 +166,22 @@ class DatomicWrapper
 		@query_entity id, (error, entity)->
 			done error, entity
 
+	create_entity: (entity_name, attributes, done)->
+		data = edn.Map()
+		data.set edn.keyword('db/id'), edn.generic('db/id', [edn.keyword 'db.part/user'])
+		for key, value of attributes
+			data.set edn.keyword(entity_name+'/'+key), value
+		data = edn.stringify [data]
+		@transact data, (err, result)->
+			# console.log 'err:', err
+			# console.log result
+			if err
+				done err, null
+			else
+				id = result.get(edn.keyword 'tempids').values[0]
+				res = util.extend {id: id}, attributes
+				done null, res
+
 module.exports.Attribute = Attribute
 module.exports.Entity = Entity
 module.exports.DatomicWrapper = DatomicWrapper

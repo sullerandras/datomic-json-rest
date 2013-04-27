@@ -82,3 +82,10 @@ describe 'util', ->
 
     it 'converts Set with primitive values to array', ->
       assert_equal '["string",123456]', JSON.stringify util.edn_to_json edn.parse '#{"string", 123456}'
+
+  describe '#extend', ->
+    it 'extends the object with attributes from an other object', ->
+      source = {id: 123, name: 'John'}
+      result = util.extend source, {address: 'Long road 32'}
+      util.matchStruct source, result
+      util.matchStruct result, source

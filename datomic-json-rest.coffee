@@ -61,7 +61,7 @@ app.get '/schema', (req, res) ->
 		sendErrorOrResult req, res, err, result
 
 app.post '/schema', (req, res)->
-	datomic.create_schema (err, result)->
+	datomic.create_schema req.body, (err, result)->
 		sendErrorOrResult req, res, err, result
 
 app.get '/schema/:schema_name', (req, res) ->
@@ -76,6 +76,10 @@ app.get '/rest/:name', (req, res) ->
 
 app.get '/rest/:name/:id', (req, res) ->
 	datomic.rest_get req.params.name, req.params.id, (err, result)->
+		sendErrorOrResult req, res, err, result
+
+app.post '/rest/:name', (req, res)->
+	datomic.create_entity req.params.name, req.body, (err, result)->
 		sendErrorOrResult req, res, err, result
 
 if argv.help

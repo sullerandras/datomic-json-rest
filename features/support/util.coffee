@@ -1,5 +1,9 @@
 edn = require 'edn'
 
+extend = (source, objects...) ->
+    source[key] = value for key, value of object for object in objects
+    source
+
 matchObject = (expected, result, skipException)->
 	for key, value of expected
 		if !Object.prototype.hasOwnProperty.call(result, key)
@@ -112,3 +116,4 @@ edn_to_json = (value)->
 module.exports.matchStruct = matchStruct
 module.exports.type = type
 module.exports.edn_to_json = edn_to_json
+module.exports.extend = extend

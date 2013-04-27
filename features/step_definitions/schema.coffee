@@ -55,3 +55,20 @@ module.exports = ->
 	@Then /^I get back the first object$/, (callback)->
 		util.matchStruct @result[0], @result_entity
 		callback()
+
+	@When /^I create a new user entity with the following parameter:$/, (table, callback)->
+		@new_entity = JSON.parse table.hashes()[0]['JSON structure']
+		@app.create_entity 'user', @new_entity, (err, result)=>
+			@result = result
+			callback()
+
+	@Then /^the result is the entity with a newly assigned ID$/, (callback)->
+		new_entity = util.extend {}, @new_entity
+		new_entity.id = '/[0-9]+/'
+		util.matchStruct new_entity, @result
+		callback()
+
+	@Then /^I can see the new entity in "rest_index" with the same ID$/, (callback)->
+		@app.rest_index "user", (err, result)=>
+			util.matchStruct [@result], result
+			callback()
