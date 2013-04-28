@@ -1,0 +1,18 @@
+<table class="table">
+	<thead>
+		<tr>
+			<th>#</th>
+			<th>id</th>
+			<th>name</th>
+			<th>region</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="d in entities">
+			<td>{{$index + 1}}</td>
+			<td><a href="#/District/{{d.id}}">{{d.id}}</td>
+			<td>{{d.name}}</td>
+			<td>{{d.region}}</td>
+		</tr>
+	</tbody>
+</table>

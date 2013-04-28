@@ -1,0 +1,26 @@
+<table class="table">
+	<thead>
+		<tr>
+			<th>#</th>
+			<th>id</th>
+			<th>name</th>
+			<th>url</th>
+			<th>neighborhood</th>
+			<th>category</th>
+			<th>orgtype</th>
+			<th>type</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="c in entities">
+			<td>{{$index + 1}}</td>
+			<td><a href="#/Community/{{c.id}}">{{c.id}}</a></td>
+			<td>{{c.name}}</td>
+			<td ng-bind-html="c.url | linky"></td>
+			<td>{{c.neighborhood}}</td>
+			<td>{{c.category.join(', ')}}</td>
+			<td>{{c.orgtype.replace('community.orgtype/', '')}}</td>
+			<td>{{c.type.replace('community.type/', '')}}</td>
+		</tr>
+	</tbody>
+</table>

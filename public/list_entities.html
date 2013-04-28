@@ -1,0 +1,11 @@
+<div ng-switch="entity_class_name">
+	<div ng-switch-when="Community">
+		<div ng-include="'communities.html'"></div>
+	</div>
+	<div ng-switch-when="Neighborhood">
+		<div ng-include="'neighborhoods.html'"></div>
+	</div>
+	<div ng-switch-when="District">
+		<div ng-include="'districts.html'"></div>
+	</div>
+</div>

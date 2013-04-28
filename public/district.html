@@ -1,0 +1,27 @@
+<form ng-submit="save()">
+	<table class="table">
+		<thead>
+			<tr>
+				<th>attribute</th>
+				<th>value</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th>id</th><td>{{entity.id}}</td>
+			</tr>
+			<tr>
+				<th>name</th><td><input ng-model="entity.name"></td>
+			</tr>
+			<tr>
+				<th>region</th><td><input ng-model="entity.region"></td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<button type="button" class="btn" ng-click="cancel()">Cancel</button>
+					<button type="submit" class="btn btn-primary">Save</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</form>

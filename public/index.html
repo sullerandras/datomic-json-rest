@@ -9,94 +9,59 @@
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.2.0/ui-bootstrap-tpls.js"></script>
 	<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
 	<style type="text/css">
-		table { border-collapse: collapse }
-		th, td { border: 1px solid black }
 	</style>
 	<script type="text/coffeescript">
-		app = angular.module 'MyApp', ['ngResource', 'ngSanitize', 'ui.bootstrap']
-		@AppController = (scope, $resource)->
-			Community = $resource '/rest/community/:id', id: '@id'
-			Neighborhood = $resource '/rest/neighborhood/:id', id: '@id'
-			District = $resource '/rest/district/:id', id: '@id'
-			scope.communities = Community.query()
-			scope.neighborhoods = Neighborhood.query()
-			scope.districts = District.query()
-		AppController.$inject = ['$scope', '$resource']
+		app = angular.module 'MyApp',
+			['ngResource', 'ngSanitize', 'ui.bootstrap'],
+			($routeProvider, $locationProvider)->
+				$routeProvider.when '/:entity_class_name',
+					templateUrl: 'list_entities.html'
+					controller: ListEntitiesController
+				$routeProvider.when '/:entity_class_name/:id',
+					templateUrl: 'edit_entity.html'
+					controller: EditEntityController
+				$routeProvider.otherwise redirectTo: '/communities'
+
+				# configure html5 to get links working on jsfiddle
+				$locationProvider.html5Mode(false)
+
+		@AppController = (scope, $resource, $location)->
+			scope.$location = $location
+			scope.Community = $resource '/rest/community/:id', {id: '@id'}, save: {method: 'PUT'}
+			scope.Neighborhood = $resource '/rest/neighborhood/:id', {id: '@id'}, save: {method: 'PUT'}
+			scope.District = $resource '/rest/district/:id', {id: '@id'}, save: {method: 'PUT'}
+			scope.panes = [
+				{heading: 'Communities', class_name: 'Community', active: true}
+				{heading: 'Neighborhoods', class_name: 'Neighborhood', active: false}
+				{heading: 'Districts', class_name: 'District', active: false}
+			]
+		@AppController.$inject = ['$scope', '$resource', '$location']
+
+		@ListEntitiesController = (scope, $resource, $routeParams)->
+			scope.entity_class_name = $routeParams.entity_class_name
+			scope.entities = scope[scope.entity_class_name].query()
+		@ListEntitiesController.$inject = ['$scope', '$resource', '$routeParams']
+
+		@EditEntityController = (scope, $resource, $routeParams)->
+			scope.cancel = ->
+				scope.$location.path '/'+scope.entity_class_name
+			scope.save = ->
+				scope.entity.$save ->
+					scope.$location.path '/'+scope.entity_class_name
+			scope.entity_class_name = $routeParams.entity_class_name
+			scope.entity = scope[scope.entity_class_name].get(id: $routeParams.id)
+		@EditEntityController.$inject = ['$scope', '$resource', '$routeParams']
 
 		angular.bootstrap document, ['MyApp']
 	</script>
 </head>
 <body ng-controller="AppController">
 	Datomic Demo
-	<tabs>
-		<pane heading="Communities">
-			<table>
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>id</th>
-						<th>name</th>
-						<th>url</th>
-						<th>neighborhood</th>
-						<th>category</th>
-						<th>orgtype</th>
-						<th>type</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="c in communities">
-						<td>{{$index + 1}}</td>
-						<td>{{c.id}}</td>
-						<td>{{c.name}}</td>
-						<td ng-bind-html="c.url | linky"></td>
-						<td>{{c.neighborhood}}</td>
-						<td>{{c.category.join(', ')}}</td>
-						<td>{{c.orgtype.replace('community.orgtype/', '')}}</td>
-						<td>{{c.type.replace('community.type/', '')}}</td>
-					</tr>
-				</tbody>
-			</table>
-		</pane>
-		<pane heading="Neighborhoods">
-			<table>
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>id</th>
-						<th>name</th>
-						<th>district</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="n in neighborhoods">
-						<td>{{$index + 1}}</td>
-						<td>{{n.id}}</td>
-						<td>{{n.name}}</td>
-						<td>{{n.district}}</td>
-					</tr>
-				</tbody>
-			</table>
-		</pane>
-		<pane heading="District">
-			<table>
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>id</th>
-						<th>name</th>
-						<th>region</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="d in districts">
-						<td>{{$index + 1}}</td>
-						<td>{{d.id}}</td>
-						<td>{{d.name}}</td>
-						<td>{{d.region}}</td>
-					</tr>
-				</tbody>
-			</table>
-		</pane>
-	</tabs>
+	<ul class="nav nav-tabs">
+		<li ng-repeat="pane in panes" ng-class="{active: $location.path() == '/'+pane.class_name}">
+			<a href ng-click="$location.path('/'+pane.class_name)">{{pane.heading}}</a>
+		</li>
+	</ul>
+	<div ng-view></div>
 </body>
 </html>
