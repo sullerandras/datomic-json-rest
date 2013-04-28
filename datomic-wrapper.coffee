@@ -1,7 +1,7 @@
 request = require 'request'
 edn = require 'edn'
 async = require 'async'
-util = require './features/support/util'
+util = require './util'
 
 class Attribute
 	constructor: (@id, @name, @type, @cardinality)->

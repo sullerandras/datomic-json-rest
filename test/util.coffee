@@ -1,5 +1,5 @@
 assert = require 'assert'
-util = require '../features/support/util'
+util = require '../util'
 edn = require 'edn'
 
 assert_equal = (expected, result, error_message)->

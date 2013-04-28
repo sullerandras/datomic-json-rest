@@ -1,4 +1,4 @@
-util = require '../support/util'
+util = require '../../util'
 
 matchStruct = (expected, result, callback)->
 	try

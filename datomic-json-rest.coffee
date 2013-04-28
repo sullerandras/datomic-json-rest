@@ -2,7 +2,7 @@
 express = require 'express'
 coffee = require 'coffee-script'
 stacktrace = require 'stacktrace-js'
-util = require './features/support/util'
+util = require './util'
 DatomicWrapper = require('./datomic-wrapper').DatomicWrapper
 optimist = require('optimist')
 	.usage('Starts the JSON REST wrapper for the specified Datomic REST server and database.\n'+
